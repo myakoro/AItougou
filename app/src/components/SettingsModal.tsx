@@ -1,9 +1,24 @@
 import React, { useMemo, useState } from 'react'
 
+type ModelOption = {
+  id: string
+  label: string
+}
+
+const MODEL_OPTIONS: ModelOption[] = [
+  { id: 'gpt-5.2', label: 'GPT-5.2（最新・推奨）' },
+  { id: 'gpt-5', label: 'GPT-5（標準）' },
+  { id: 'gpt-5-mini', label: 'GPT-5-mini（軽量）' },
+  { id: 'gpt-5-nano', label: 'GPT-5-nano（超軽量）' },
+]
+
+const DEFAULT_MODEL = 'gpt-5.2'
+
 const validateKey = (v: string): string | null => {
-  if (v.trim().length === 0) return 'APIキーを入力してください'
-  if (v.length > 200) return 'APIキーは200文字以内で入力してください'
-  if (!/^[0-9A-Za-z]+$/.test(v)) return 'APIキーは半角英数字のみで入力してください'
+  const trimmed = v.trim()
+  if (trimmed.length === 0) return 'APIキーを入力してください'
+  if (trimmed.length > 200) return 'APIキーは200文字以内で入力してください'
+  if (!/^[0-9A-Za-z_-]+$/.test(trimmed)) return '使用できない文字が含まれています'
   return null
 }
 
@@ -20,6 +35,7 @@ export default function SettingsModal({
 
   const [chatgptApiKey, setChatgptApiKey] = useState('')
   const [perplexityApiKey, setPerplexityApiKey] = useState('')
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
 
   const chatgptError = useMemo(() => validateKey(chatgptApiKey), [chatgptApiKey])
   const perplexityError = useMemo(() => validateKey(perplexityApiKey), [perplexityApiKey])
@@ -30,7 +46,7 @@ export default function SettingsModal({
     if (!api) return
     if (saveDisabled) return
 
-    await api.saveApiKeys({ chatgptApiKey, perplexityApiKey })
+    await api.saveApiKeys({ chatgptApiKey, perplexityApiKey, selectedModel })
     await onSaved()
   }
 
@@ -38,7 +54,7 @@ export default function SettingsModal({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
-      <div className="w-[600px] h-[400px] rounded-lg bg-white shadow flex flex-col overflow-hidden">
+      <div className="w-[600px] h-[500px] rounded-lg bg-white shadow flex flex-col overflow-hidden">
         <div className="h-12 px-4 border-b border-slate-200 flex items-center justify-between">
           <div className="text-sm font-semibold">API設定</div>
           <button
@@ -75,6 +91,25 @@ export default function SettingsModal({
               {perplexityError ? (
                 <div className="mt-1 text-xs text-rose-700">{perplexityError}</div>
               ) : null}
+            </div>
+
+            <div className="border-t border-slate-200 pt-5">
+              <div className="text-sm font-semibold text-slate-800 mb-3">回答モデル</div>
+              <div className="space-y-2">
+                {MODEL_OPTIONS.map((model) => (
+                  <label key={model.id} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="chatgpt-model"
+                      value={model.id}
+                      checked={selectedModel === model.id}
+                      onChange={() => setSelectedModel(model.id)}
+                      className="w-4 h-4 text-slate-900"
+                    />
+                    <span className="text-sm text-slate-800">{model.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         </div>

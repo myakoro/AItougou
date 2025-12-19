@@ -7,21 +7,21 @@ import ErrorDialog from './components/ErrorDialog'
 const statusLabel = (status: ProcessingStatus): string => {
   switch (status) {
     case 'idle':
-      return '入力待ち'
-    case 'querying_chatgpt':
-      return 'ChatGPTに問い合わせ中'
-    case 'querying_perplexity':
-      return 'Perplexityに問い合わせ中'
-    case 'integrating':
-      return '回答を統合中'
+      return '待機中'
+    case 'classifying':
+      return '質問分類中'
+    case 'generating':
+      return '回答生成中'
+    case 'researching':
+      return '調査中'
     case 'completed':
-      return '回答表示'
-    case 'error':
-      return 'エラーが発生しました'
+      return '完了'
+    case 'failed':
+      return '失敗'
   }
 }
 
-const canSendWithStatus = (s: ProcessingStatus) => s === 'idle' || s === 'completed'
+const canSendWithStatus = (s: ProcessingStatus) => s === 'idle' || s === 'completed' || s === 'failed'
 
 type DeleteTarget = { threadId: string; threadName: string }
 
@@ -99,9 +99,9 @@ export default function App() {
     clearStatusSimulation()
 
     const ids: number[] = []
-    ids.push(window.setTimeout(() => setStatus('querying_chatgpt'), 0))
-    ids.push(window.setTimeout(() => setStatus('querying_perplexity'), 700))
-    ids.push(window.setTimeout(() => setStatus('integrating'), 1400))
+    ids.push(window.setTimeout(() => setStatus('classifying'), 0))
+    ids.push(window.setTimeout(() => setStatus('generating'), 500))
+    ids.push(window.setTimeout(() => setStatus('researching'), 1000))
     statusSimulationTimerIds.current = ids
   }
 
@@ -164,7 +164,7 @@ export default function App() {
 
       if (res.error) {
         clearStatusSimulation()
-        setStatus('error')
+        setStatus('failed')
         setErrorDialog(res.error)
         return
       }

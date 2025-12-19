@@ -16,18 +16,18 @@ declare global {
       getThread: (threadId: string) => Promise<ThreadDetail>
       createThread: () => Promise<ThreadSummary>
       deleteThread: (threadId: string) => Promise<void>
-      saveApiKeys: (keys: { chatgptApiKey: string; perplexityApiKey: string }) => Promise<void>
+      saveApiKeys: (keys: { chatgptApiKey: string; perplexityApiKey: string; selectedModel: string }) => Promise<void>
       getApiKeyStatus: () => Promise<{ chatgpt: boolean; perplexity: boolean }>
     }
   }
 
   type ProcessingStatus =
     | 'idle'
-    | 'querying_chatgpt'
-    | 'querying_perplexity'
-    | 'integrating'
+    | 'classifying'
+    | 'generating'
+    | 'researching'
     | 'completed'
-    | 'error'
+    | 'failed'
 
   type AppErrorType =
     | 'NETWORK_ERROR'
